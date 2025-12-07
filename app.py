@@ -10,34 +10,44 @@ app.layout = dbc.Container([
     html.H1("🍓 Strawberry Elephant: Вся таблица умножения", className="text-center mt-4 text-primary"),
     html.P("Решай примеры и собирай клубнички!", className="text-center text-muted mb-4 h5"),
 
-    dbc.Row(dbc.Col(dbc.Card([
-        dbc.CardHeader("📚 Таблица умножения от 1 до 10", className="h4"),
-        dbc.CardBody([
-            dbc.Row([dbc.Col(html.Div([
-                html.H4(f"{i} × {j} = ?", className="text-center", style={'color': '#555'}),
-                html.H4(f"{i*j}", className="text-center text-success mt-2", style={'display': 'none'}, id=f'a-{i}-{j}')
-            ], className="border p-3 m-1 rounded"), width=2) for j in range(1, 11)]) for i in range(1, 11)
-        ])
-    ], className="mb-4"), width=12)),
+    dbc.Row([
+        dbc.Col([
+            dbc.Card([
+                dbc.CardHeader("📚 Таблица умножения от 1 до 10", className="h4"),
+                dbc.CardBody([
+                    dbc.Row([
+                        dbc.Col(html.Div([
+                            html.H4(f"{i} × {j} = ?", className="text-center", style={'color': '#555'}),
+                            html.H4(f"{i*j}", className="text-center text-success mt-2", style={'display': 'none'}, id=f'a-{i}-{j}')
+                        ], className="border p-3 m-1 rounded"), width=2) for j in range(1, 11)
+                    ]) for i in range(1, 11)
+                ])
+            ], className="mb-4")
+        ], width=12)
+    ]),
 
-    dbc.Row(dbc.Col(dbc.Card([
-        dbc.CardHeader("✏️ Тренажёр", className="h4"),
-        dbc.CardBody([
-            html.H2(id='question', children="", className="text-center mb-4 text-warning"),
-            dbc.Input(id='user-answer', type='number', placeholder="Введи ответ...", className="mb-3 text-center", size="lg"),
-            dbc.Row([
-                dbc.Col(dbc.Button("✅ Проверить", id='check-btn', color="primary", className="w-100"), width=6),
-                dbc.Col(dbc.Button("🎲 Новый пример", id='new-btn', color="secondary", className="w-100"), width=6)
-            ]),
-            html.Div(id='result', className="h3 text-center mt-3"),
-            html.Hr(),
-            dbc.Row([
-                dbc.Col(html.Div(["Правильно: ", html.Span("0", id="correct", className="text-success h3")]), className="text-center"),
-                dbc.Col(html.Div(["Всего: ", html.Span("0", id="total", className="text-info h3")]), className="text-center"),
-                dbc.Col(html.Div(["Успех: ", html.Span("0%", id="percent", className="text-warning h3")]), className="text-center")
+    dbc.Row([
+        dbc.Col([
+            dbc.Card([
+                dbc.CardHeader("✏️ Тренажёр", className="h4"),
+                dbc.CardBody([
+                    html.H2(id='question', children="", className="text-center mb-4 text-warning"),
+                    dbc.Input(id='user-answer', type='number', placeholder="Введи ответ...", className="mb-3 text-center", size="lg"),
+                    dbc.Row([
+                        dbc.Col(dbc.Button("✅ Проверить", id='check-btn', color="primary", className="w-100"), width=6),
+                        dbc.Col(dbc.Button("🎲 Новый пример", id='new-btn', color="secondary", className="w-100"), width=6)
+                    ]),
+                    html.Div(id='result', className="h3 text-center mt-3"),
+                    html.Hr(),
+                    dbc.Row([
+                        dbc.Col(html.Div(["Правильно: ", html.Span("0", id="correct", className="text-success h3")]), className="text-center"),
+                        dbc.Col(html.Div(["Всего: ", html.Span("0", id="total", className="text-info h3")]), className="text-center"),
+                        dbc.Col(html.Div(["Успех: ", html.Span("0%", id="percent", className="text-warning h3")]), className="text-center")
+                    ])
+                ])
             ])
-        ])
-    ]), width=12)
+        ], width=12)
+    ])
 ], fluid=True)
 
 @app.callback(
@@ -49,7 +59,7 @@ app.layout = dbc.Container([
 )
 def update_question(new_clicks, check_clicks, user_answer):
     ctx = dash.callback_context
-    if ctx.triggered_id == 'new-btn' or not ctx.triggered:
+    if not ctx.triggered or ctx.triggered_id == 'new-btn':
         a = random.randint(1, 10)
         b = random.randint(1, 10)
         return f"{a} × {b} = ?"
@@ -73,7 +83,8 @@ def check_answer(clicks, question, user_answer, correct_str, total_str):
         return "", html.Div("Введи число!", className="text-warning"), correct_str, total_str, dash.no_update
 
     try:
-        a, b = map(int, question.split('×')[0].strip()), int(question.split('×')[1].split('=')[0].strip())
+        a = int(question.split('×')[0].strip())
+        b = int(question.split('×')[1].split('=')[0].strip())
         correct = a * b
         total = int(total_str) + 1
 
